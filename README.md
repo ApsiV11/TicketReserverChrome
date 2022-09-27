@@ -2,7 +2,7 @@
 Simple ticket reserver for KideApp
 
 # Requirements
-Python 3
+Python 3 with requests package
 
 # How to use
 1. Run the file in command line or in the way of your choosing.
