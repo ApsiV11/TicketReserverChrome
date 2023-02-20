@@ -1,0 +1,27 @@
+<!doctype html>
+<html>
+    <head>
+        <title>Ticket Reserver</title>
+        <script type="text/javascript" src="scripts/chrome-extension-async.js" defer></script>
+        <script type="text/javascript" src="scripts/reserver.js" defer></script>
+    </head>
+    <body>
+        <form>
+            <p>Please navigate to the event page for this reserver to work.</p>
+            <p>All inputs below are optional. By default one of the first available item is reserved (or all if there are now limits).</p>
+            <label for="amount">Amount of tickets reserved:</label>
+            <input type="number" id="amount" name="amount" value="" min="0" size="5">
+            <br />
+            <label for="type">Product type (0-n, index of element in page from top to bottom):</label>
+            <input type="number" id="type" name="type" value="" min="0" size="5">
+            <br />
+            <label for="price">Price in cents:</label>
+            <input type="number" id="price" name="price" value="" min="0" size="5">
+            <br />
+            <label for="keywords">Keywords (in form optional|optional|optional,wanted,wanted,optional|optional):</label>
+            <input type="text" id="keywords" name="keywords" value="" size="36">
+            <br />
+            <button type="button" id="reserveButton">Reserve!</button>
+        </form>
+    </body>
+</html>
