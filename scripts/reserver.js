@@ -111,7 +111,7 @@ chrome.tabs.query({currentWindow: true, active: true}, async (tabs) => {
             }
 
             //Else reserve with respect to keywords
-            else if(avainsanat.length>0) {
+            else if(keywords.length>0) {
                 let i = 0
                 while(i<variants.length) {
                     let desc = variants[i]['description'].lower().strip()
