@@ -114,8 +114,8 @@ chrome.tabs.query({currentWindow: true, active: true}, async (tabs) => {
             else if(keywords.length>0) {
                 let i = 0
                 while(i<variants.length) {
-                    let desc = variants[i]['description'].lower().strip()
-                    let name = variants[i]['name'].lower().strip()
+                    let desc = variants[i]['description'].toLowerCase().trim()
+                    let name = variants[i]['name'].toLowerCase().trim()
                     let descpname = desc+name
                     let found = keywords.every((keys) => keys.split("|").some((key) => descpname.contains(key.trim())))
                     if(found) {
