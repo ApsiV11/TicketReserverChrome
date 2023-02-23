@@ -38,7 +38,7 @@ chrome.tabs.query({currentWindow: true, active: true}, async (tabs) => {
         //Get values of optional, user-given fields
         const type = document.getElementById("type").value
         const price = document.getElementById("price").value
-        const keywords = document.getElementById("keywords").value.toLowerCase().trim().split(",")
+        const keywords = document.getElementById("keywords").value
 
         //Fetch the start time of sales
         const url = "https://api.kide.app/api/products/" + id
@@ -76,6 +76,7 @@ chrome.tabs.query({currentWindow: true, active: true}, async (tabs) => {
         let maxTotalReservationsPerCheckout = product['maxTotalReservationsPerCheckout']
 
         let toCreates = []
+        let variant = 0
 
         //If there is no maximum amount, reserve every type
         if(!maxTotalReservationsPerCheckout) {
@@ -90,7 +91,6 @@ chrome.tabs.query({currentWindow: true, active: true}, async (tabs) => {
         }
 
         else {
-            let variant = 0
 
             //If type is selected, reserve it
             if(type.length>0) {
@@ -112,12 +112,13 @@ chrome.tabs.query({currentWindow: true, active: true}, async (tabs) => {
 
             //Else reserve with respect to keywords
             else if(keywords.length>0) {
+                const keys = keywords.toLowerCase().trim().split(",")
                 let i = 0
                 while(i<variants.length) {
                     let desc = variants[i]['description'].toLowerCase().trim()
                     let name = variants[i]['name'].toLowerCase().trim()
                     let descpname = desc+name
-                    let found = keywords.every((keys) => keys.split("|").some((key) => descpname.contains(key.trim())))
+                    let found = keys.every((keys) => keys.split("|").some((key) => descpname.includes(key.trim())))
                     if(found) {
                         variant = i
                         break
@@ -126,7 +127,7 @@ chrome.tabs.query({currentWindow: true, active: true}, async (tabs) => {
                 }
             }
 
-            document.write("<p>Reservations limited. Buying variant at index" + variant+".</p>")
+            document.write("<p>Reservations limited. Buying variant at index " + variant+".</p>")
             let v = variants[variant]
             let availability = v['availability']
             toCreates.push({"inventoryId": v['inventoryId'], "quantity": Math.min(amount, availability, maxTotalReservationsPerCheckout)})
@@ -139,19 +140,21 @@ chrome.tabs.query({currentWindow: true, active: true}, async (tabs) => {
             chrome.tabs.reload()
         }
 
+        let variantIndex = 0
         //If the reservation fails try every variant one at a time
-        while(!maxTotalReservationsPerCheckout && response2.status!=200) {
+        while(maxTotalReservationsPerCheckout && response2.status!=200) {
             toCreates=[]
             document.write("<h3>Error, trying again</h3>")
             if(variantIndex == variant) {
                 variantIndex = variantIndex+1
             }
             let v=variants[variantIndex]
+            console.log(variantIndex)
             let availability = v['availability']
             toCreates.push({"inventoryId": v['inventoryId'], "quantity":Math.min(amount, availability, maxTotalReservationsPerCheckout)})
 
             //Reservation
-            let response2 = await makeReservation(toCreates, auth)
+            response2 = await makeReservation(toCreates, auth)
             document.write("<h3>Status: "+response2.status+"</h3>")
 
             if(response2.status==200) {
@@ -162,23 +165,23 @@ chrome.tabs.query({currentWindow: true, active: true}, async (tabs) => {
         }
 
         //If the availibity info is wrong, we need to try again without the variant that failed
-        while(maxTotalReservationsPerCheckout && response2.status!=200) {
+        while(!maxTotalReservationsPerCheckout && response2.status!=200) {
             document.write("<h3>Error, trying again</h3>")
-            let jsonData = response2.json()
+            let jsonData = await response2.json()
             let errorInventoryId = jsonData['error']['entity']['inventoryId']
 
             let newVariants = []
 
             for(const v of toCreates) {
-                if(variant['inventoryId']!=errorInventoryId) {
-                    newVariants.push(variant)
+                if(v['inventoryId']!=errorInventoryId) {
+                    newVariants.push(v)
                 }
             }
 
             toCreates = newVariants
 
             //Reservation
-            let response2 = await makeReservation(toCreates, auth)
+            response2 = await makeReservation(toCreates, auth)
             document.write("<h3>Status: "+response2.status+"</h3>")
 
             if(response2.status==200) {
