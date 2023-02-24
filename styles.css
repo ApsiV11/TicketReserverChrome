@@ -1,0 +1,22 @@
+#container {
+    width: 25rem;
+    display: block;
+    font-size: 1rem;
+}
+
+div {
+    margin: 0.25rem;
+}
+
+input {
+    height: 1rem;
+}
+
+#amount,#type,#price {
+    width: 3rem;
+}
+
+#keywords {
+    margin-top: 0.25rem;
+    width: 15rem;
+}

@@ -20,14 +20,35 @@ function makeReservation(toCreates, auth) {
     return fetch(url, options)
 }
 
+const cont = document.getElementById("container")
+
+function addMessage(text, type) {
+    if(type==0) {
+        const h2 = document.createElement("h2")
+        h2.innerText = text
+        cont.appendChild(h2)
+    }
+    else if(type==1) {
+        const h3 = document.createElement("h3")
+        h3.innerText = text
+        cont.appendChild(h3)
+    }
+    else {
+        const p = document.createElement("p")
+        p.innerText = text
+        cont.appendChild(p)
+    }
+}
+
 chrome.tabs.query({currentWindow: true, active: true}, async (tabs) => {
     const result = await chrome.scripting.executeScript({target: {tabId: tabs[0].id}, func: () => {return localStorage['authorization.token']} })
     
     const auth = result[0].result.substring(1, result[0].result.length-1)
     const regexedString = tabs[0].url.match(/https:\/\/kide\.app\/events\/([0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12})/)
 
-    if(!regexedString) {
-        document.write("<h2>Please navigate to the event page an reload this script!</h2>")
+    if(!regexedString || regexedString.length==1) {
+        container.innerHTML = "<h2>Please navigate to the event page an reload this script!</h2>"
+        return
     }
 
     const id = regexedString[1]
@@ -53,9 +74,9 @@ chrome.tabs.query({currentWindow: true, active: true}, async (tabs) => {
         const startTimeOfSales = (await (await fetch(url, options)).json())['model']['product']['dateSalesFrom']
         const startTime = new Date(startTimeOfSales).getTime()
         const now = new Date().getTime()
-        document.write("<h2>Waiting for the sales to start</h2>")
+        container.innerHTML = startTime-now>0 ? "<h2>Waiting for the sales to start</h2>" : ""
         await sleep(startTime-now >= 0 ? startTime-now : 0)
-        document.write("<h2>Begin script</h2>")
+        addMessage("Begin script", 0)
 
         let variants, product
 
@@ -80,7 +101,7 @@ chrome.tabs.query({currentWindow: true, active: true}, async (tabs) => {
 
         //If there is no maximum amount, reserve every type
         if(!maxTotalReservationsPerCheckout) {
-            document.write("<p>Reservations not limited. Reserving the amount specified of every type.</p>")
+            addMessage("Reservations not limited. Reserving the amount specified of every ticket.", 2)
             for(const v of variants) {
                 let availability = v['availability']
                 let productVariantMaximumReservableQuantity = v['productVariantMaximumReservableQuantity']
@@ -127,15 +148,15 @@ chrome.tabs.query({currentWindow: true, active: true}, async (tabs) => {
                 }
             }
 
-            document.write("<p>Reservations limited. Buying variant at index " + variant+".</p>")
             let v = variants[variant]
             let availability = v['availability']
             toCreates.push({"inventoryId": v['inventoryId'], "quantity": Math.min(amount, availability, maxTotalReservationsPerCheckout)})
+            addMessage("Reservations limited. Trying to reserve ticket " + v['name']+".", 2)
         }
 
         //Reservation
         let response2 = await makeReservation(toCreates, auth)
-        document.write("<h3>Status: "+response2.status+"</h3>")
+        addMessage("Status: "+response2.status, 1)
         if(response2.status==200) {
             chrome.tabs.reload()
         }
@@ -144,18 +165,19 @@ chrome.tabs.query({currentWindow: true, active: true}, async (tabs) => {
         //If the reservation fails try every variant one at a time
         while(maxTotalReservationsPerCheckout && response2.status!=200) {
             toCreates=[]
-            document.write("<h3>Error, trying again</h3>")
+            addMessage("Error, trying again", 1)
             if(variantIndex == variant) {
                 variantIndex = variantIndex+1
             }
             let v=variants[variantIndex]
             console.log(variantIndex)
             let availability = v['availability']
+            addMessage("Trying to reserve ticket " + v['name']+".", 2)
             toCreates.push({"inventoryId": v['inventoryId'], "quantity":Math.min(amount, availability, maxTotalReservationsPerCheckout)})
 
             //Reservation
             response2 = await makeReservation(toCreates, auth)
-            document.write("<h3>Status: "+response2.status+"</h3>")
+            addMessage("Status: "+response2.status, 1)
 
             if(response2.status==200) {
                 chrome.tabs.reload()
@@ -166,7 +188,7 @@ chrome.tabs.query({currentWindow: true, active: true}, async (tabs) => {
 
         //If the availibity info is wrong, we need to try again without the variant that failed
         while(!maxTotalReservationsPerCheckout && response2.status!=200) {
-            document.write("<h3>Error, trying again</h3>")
+            addMessage("Error, trying again", 1)
             let jsonData = await response2.json()
             let errorInventoryId = jsonData['error']['entity']['inventoryId']
 
@@ -182,20 +204,25 @@ chrome.tabs.query({currentWindow: true, active: true}, async (tabs) => {
 
             //Reservation
             response2 = await makeReservation(toCreates, auth)
-            document.write("<h3>Status: "+response2.status+"</h3>")
+            addMessage("Status: "+response2.status, 1)
 
             if(response2.status==200) {
                 chrome.tabs.reload()
             }
         }
-        //document.write("<h3>Response JSON</h3>")
-        //document.write(`<p>${JSON.stringify(await response2.json())}</p>`)
+        const reservationJson = await response2.json()
+        //addMessage("Response JSON", 1)
+        //addMessage(`${JSON.stringify(reservationJson)}`, 2)
 
         if(response2.status==200) {
-            document.write("<h2>Reservation successful!</h2>")
+            addMessage("Reservation successful!", 0)
+            const reservations = reservationJson['model']['reservations']
+            const reservationsText = reservations.map((r) => `${r['reservedQuantity']} of ticket ${r['variantName']}`).join(', ')
+            addMessage("Reserved " + reservationsText+".", 2)
+            addMessage("This box can now be closed.", 2)
         }
         else {
-            document.write("<h2>Error!</h2>")
+            addMessage("Error!", 0)
         }
     })
-});
+})
