@@ -2,10 +2,15 @@
     width: 25rem;
     display: block;
     font-size: 1rem;
+    background-color: #5e35b1;
+    border-radius: 10px;
+    padding: 5px;
+    margin: 0;
+    color: white;
 }
 
 div {
-    margin: 0.25rem;
+    margin: 0.5rem;
 }
 
 input {
@@ -17,6 +22,27 @@ input {
 }
 
 #keywords {
-    margin-top: 0.25rem;
+    margin-top: 0.5rem;
     width: 15rem;
+}
+
+#reserveButton {
+    margin-top: 0.5rem;
+    width: 5rem;
+    height: 1.5rem;
+    background-color: #d32f2f;
+    color: white;
+    border-radius: 10px;
+    border: none;
+}
+
+#buttonContainer {
+    text-align: center;
+}
+
+/** h1 with yellow cool font centered **/
+h1 {
+    font-family:'Segoe UI';
+    text-align: center;
+    color: #ffeb3b;
 }

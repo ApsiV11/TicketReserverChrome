@@ -8,10 +8,15 @@
     </head>
     <body>
         <div id="container">
-            <p>All inputs below are optional. By default one of the first available item is reserved (or all if there are no limits).</p>
+            <div>
+                <h1>Ticket Reserver</h1>
+            </div>
+            <div>
+                <p>All inputs are optional. <br /> By default one of the first available item is reserved <br /> (or one of every item if there are no limits).</p>
+            </div>
             <div>
                 <label for="amount">Amount of tickets reserved:</label>
-                <input type="number" id="amount" name="amount" value="" min="0">
+                <input type="number" id="amount" name="amount" value="" min="1">
             </div>
             <div>
                 <label for="type">Product type (0-n, index from top to bottom):</label>
@@ -22,10 +27,10 @@
                 <input type="number" id="price" name="price" value="" min="0">
             </div>
             <div>
-                <label for="keywords">Keywords (in form alternative|alternative,wanted,alternative|alternative):</label>
-                <input type="text" id="keywords" name="keywords" value="">
+                <label for="keywords">Keywords:</label>
+                <input type="text" id="keywords" name="keywords" value="" placeholder="alternative|alternative,required">
             </div>
-            <div>
+            <div id="buttonContainer">
                 <button type="button" id="reserveButton">Reserve!</button>
             </div>
         </div>
