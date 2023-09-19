@@ -87,6 +87,7 @@ chrome.tabs.query({currentWindow: true, active: true}, async (tabs) => {
         while(!reservationPost || !reservationPost.body) {
 
             //Make sure that the sales have actually started
+            let firstFetch = true
             while(true) {
                 const inventoryData = (await (await fetch(url, options)).json())
                 variants = inventoryData['model']['variants']
@@ -96,8 +97,9 @@ chrome.tabs.query({currentWindow: true, active: true}, async (tabs) => {
                 let salesStarted = product['salesStarted']
                 let totalAvailability = variants.reduce((acc, v) => acc + v['availability'], 0)
                 if(totalAvailability===0) {
-                    addMessage("No tickets available, fetching again", 0)
+                    firstFetch && addMessage("No tickets available, fetching again", 0)
                     await sleep(50)
+                    firstFetch = false
                     continue
                 }
                 if(salesStarted && salesOngoing && !salesPaused) {
