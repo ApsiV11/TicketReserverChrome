@@ -59,7 +59,31 @@ chrome.tabs.query({currentWindow: true, active: true}, async (tabs) => {
         //Get values of optional, user-given fields
         const type = document.getElementById("type").value
         const price = document.getElementById("price").value
-        const keywords = document.getElementById("keywords").value
+        const keywords = [...document.querySelectorAll(".keyword button:nth-child(1)")].map((button) => ({text: button.textContent, optional: button.classList.contains("optional")}))
+
+        //Map adjacent optional keywords to a single string
+        let keywordString = ""
+        let lastWasOptional = false
+        let first = true
+        for (const keyword of keywords) {
+            if (keyword.optional) {
+                if (lastWasOptional) {
+                    keywordString += "|"
+                } else if (!first) {
+                    keywordString += ","
+                }
+                keywordString += keyword.text
+                lastWasOptional = true
+            } else {
+                if (!first) {
+                    keywordString += ","
+                }
+                keywordString += keyword.text
+                lastWasOptional = false
+            }
+            first = false
+        }
+
 
         //Fetch the start time of sales
         const url = "https://api.kide.app/api/products/" + id
@@ -240,6 +264,54 @@ chrome.tabs.query({currentWindow: true, active: true}, async (tabs) => {
             }
             
             firstIteration = false
+        }
+    })
+
+    // Keyword handler
+    const keywordContainer = document.getElementById("keywordContainer")
+    const keywordsInput = document.getElementById("keywordsInput")
+    const addKeywordButton = document.getElementById("addKeywordButton")
+
+    // Create a function to add a keyword element
+    function addKeywordElement(keyword, isRequired) {
+        const keywordElement = document.createElement("div")
+        keywordElement.classList.add("keyword")
+
+        const keywordButton = document.createElement("button")
+        keywordButton.textContent = keyword
+
+        // Add a class based on whether it's required or optional
+        if (isRequired) {
+            keywordButton.classList.add("required")
+        } else {
+            keywordButton.classList.add("optional")
+        }
+
+        // Add an event listener to toggle the required/optional status
+        keywordButton.addEventListener("click", () => {
+            keywordButton.classList.toggle("required")
+            keywordButton.classList.toggle("optional")
+        });
+
+        // Add an event listener to remove the keyword
+        const removeButton = document.createElement("button")
+        removeButton.textContent = "x"
+        removeButton.classList.add("remove-button")
+        removeButton.addEventListener("click", () => {
+            keywordElement.remove()
+        });
+
+        keywordElement.appendChild(keywordButton)
+        keywordElement.appendChild(removeButton)
+        keywordContainer.appendChild(keywordElement)
+    }
+
+    // Add event listener to the "Add" button
+    addKeywordButton.addEventListener("click", () => {
+        const keyword = keywordsInput.value.trim()
+        if (keyword !== "") {
+            addKeywordElement(keyword, true); // By default, keywords are required
+            keywordsInput.value = "" // Clear the input field
         }
     })
 })

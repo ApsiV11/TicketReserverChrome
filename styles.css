@@ -1,3 +1,7 @@
+body {
+    margin: 0;
+}
+
 /* Container */
 #container {
     width: 25rem;
@@ -5,7 +9,6 @@
     font-size: 1rem;
     margin: 0 auto;
     background-color: #6200ea;
-    border-radius: 8px;
     padding: 15px;
     color: white;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
@@ -68,4 +71,58 @@ h1 {
     color: #ffeb3b;
     font-size: 2rem;
     margin-top: 1rem;
+}
+
+/* Style for keyword container */
+#keywordContainer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-top: 5px;
+}
+
+#addKeywordButton {
+    background-color: green;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+/* Hover effect for the "Add" button */
+#addKeywordButton:hover {
+    background-color: darkgreen;
+}
+
+.keyword {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin: 0;
+}
+
+/* Style for each keyword element */
+.keyword button {
+    padding: 3px 5px;
+    border: none;
+    border-radius: 3px;
+    background-color: red; /* Default color for optional keywords */
+    color: white;
+}
+
+/* Style for required keywords */
+.keyword button.optional {
+    background-color: yellow;
+    color: #333;
+}
+
+/* Style for remove button */
+.remove-button {
+    background-color: transparent;
+    border: none;
+    color: red;
+    font-weight: bold;
+    cursor: pointer;
+    margin-left: 5px;
 }

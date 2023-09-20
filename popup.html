@@ -27,8 +27,13 @@
                 <input type="number" id="price" name="price" value="" min="0">
             </div>
             <div>
+                <p>Keywords are required (red) by default. You can change the keyword to alternative (yellow) by clicking it. Alternative keywords need to be adjacent to each other.</p>
                 <label for="keywords">Keywords:</label>
-                <input type="text" id="keywords" name="keywords" value="" placeholder="alternative|alternative,required">
+                <input type="text" id="keywordsInput" name="keywords">
+                <button type="button" id="addKeywordButton">Add</button>
+            </div>
+            <div id="keywordContainer">
+                <!-- Keywords will be added here dynamically -->
             </div>
             <div id="buttonContainer">
                 <button type="button" id="reserveButton">Reserve!</button>
