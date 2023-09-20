@@ -1,48 +1,71 @@
+/* Container */
 #container {
     width: 25rem;
-    display: block;
+    max-width: 100%;
     font-size: 1rem;
-    background-color: #5e35b1;
-    border-radius: 10px;
-    padding: 5px;
-    margin: 0;
+    margin: 0 auto;
+    background-color: #6200ea;
+    border-radius: 8px;
+    padding: 15px;
     color: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
+/* Spacing for all div elements */
 div {
-    margin: 0.5rem;
+    overflow-wrap: break-word;
+    margin: 0.8rem 0;
 }
 
+/* Input fields */
 input {
     height: 1rem;
+    padding: 0.1rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    outline: none;
+    transition: border-color 0.3s;
 }
 
-#amount,#type,#price {
-    width: 3rem;
+/* Small input fields */
+#amount, #type, #price {
+    width: 4rem;
 }
 
+/* Keywords input field */
 #keywords {
-    margin-top: 0.5rem;
-    width: 15rem;
+    margin-top: 1rem;
+    width: 100%;
+    max-width: 20rem;
 }
 
+/* Reserve button */
 #reserveButton {
-    margin-top: 0.5rem;
-    width: 5rem;
-    height: 1.5rem;
+    margin-top: 1rem;
+    width: 8rem;
+    height: 2.5rem;
     background-color: #d32f2f;
     color: white;
-    border-radius: 10px;
     border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
 }
 
+#reserveButton:hover {
+    background-color: #b71c1c;
+}
+
+/* Button container */
 #buttonContainer {
     text-align: center;
 }
 
-/** h1 with yellow cool font centered **/
+/* Centered h1 with a cool font and yellow color */
 h1 {
-    font-family:'Segoe UI';
+    font-family: 'Segoe UI', sans-serif;
     text-align: center;
     color: #ffeb3b;
+    font-size: 2rem;
+    margin-top: 1rem;
 }
