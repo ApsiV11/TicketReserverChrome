@@ -12,5 +12,10 @@
     ],
     "host_permissions": [
         "https://kide.app/*"
-    ]
+    ],
+    "browser_specific_settings": {
+      "gecko": {
+        "id": "aapolaakkio@outlook.com"
+      }
+    }
 }
