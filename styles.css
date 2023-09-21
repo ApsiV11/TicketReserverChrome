@@ -4,7 +4,7 @@ body {
 
 /* Container */
 #container {
-    width: 25rem;
+    width: 20rem;
     max-width: 100%;
     font-size: 1rem;
     margin: 0 auto;
@@ -12,12 +12,14 @@ body {
     padding: 15px;
     color: white;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
 }
 
 /* Spacing for all div elements */
 div {
     overflow-wrap: break-word;
-    margin: 0.8rem 0;
+    margin: 0.4rem 0;
 }
 
 /* Input fields */
@@ -71,6 +73,7 @@ h1 {
     color: #ffeb3b;
     font-size: 2rem;
     margin-top: 1rem;
+    margin-bottom: 0;
 }
 
 /* Style for keyword container */

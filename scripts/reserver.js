@@ -3,7 +3,7 @@ function sleep(ms) {
 }
 
 function makeReservation(toCreates, auth) {
-    let body = {"toCreate":toCreates,"toCancel":[]}
+    let body = {"toCreate":toCreates,"toCancel":[], expectCart: true, includeDeliveryMethods: false}
 
     const url = "https://api.kide.app/api/reservations"
     const options = {
