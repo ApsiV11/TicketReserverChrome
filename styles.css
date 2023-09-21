@@ -121,8 +121,54 @@ h1 {
 .remove-button {
     background-color: transparent;
     border: none;
-    color: red;
+    color: #ff5757; /* A modern red color */
     font-weight: bold;
     cursor: pointer;
     margin-left: 5px;
+    transition: color 0.3s ease, transform 0.2s ease; /* Smooth color and transform transitions */
+    outline: none; /* Remove the default focus outline */
+    font-size: 16px;
+    padding: 0;
+}
+
+/* Hover effect */
+.remove-button:hover {
+    color: #ff4040; /* Slightly darker red on hover */
+    transform: scale(1.1); /* Scale the button slightly on hover for a modern touch */
+}
+
+/* Focus effect */
+.remove-button:focus {
+    box-shadow: 0 0 0 3px rgba(255, 87, 87, 0.3); /* Add a subtle focus border */
+}
+
+/* Tooltip container */
+.tooltip {
+    position: relative;
+    display: inline-block;
+    cursor: help; /* Change cursor to a question mark on hover */
+}
+
+/* Tooltip text */
+.tooltip .tooltiptext {
+    visibility: hidden;
+    width: 200px;
+    background-color: #333;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px;
+    position: absolute;
+    z-index: 1;
+    bottom: 125%; /* Position the tooltip above the text */
+    left: 50%;
+    transform: translateX(-50%);
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+/* Show tooltip on hover */
+.tooltip:hover .tooltiptext {
+    visibility: visible;
+    opacity: 1;
 }
