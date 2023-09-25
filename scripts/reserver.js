@@ -20,6 +20,17 @@ function makeReservation(toCreates, auth) {
     return fetch(url, options)
 }
 
+async function isSuccessful(reservationPost) {
+    try {
+        const reservationJson = await reservationPost.json()
+        const successful = reservationPost.status==200 && reservationJson?.['model']?.['reservations']?.length>0
+        return {successful, reservationJson}
+    }
+    catch {
+        return {successful: false, reservationJson: null}
+    }
+}
+
 const cont = document.getElementById("container")
 
 function addMessage(text, type) {
@@ -44,14 +55,14 @@ chrome.tabs.query({currentWindow: true, active: true}, async (tabs) => {
     const result = await chrome.scripting.executeScript({target: {tabId: tabs[0].id}, func: () => {return localStorage['authorization.token']} })
     
     const auth = result[0].result.substring(1, result[0].result.length-1)
-    const regexedString = tabs[0].url.match(/https:\/\/kide\.app\/events\/([0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12})/)
+    const regexedString = tabs[0].url.match(/https:\/\/kide\.app\/(en\/|fi\/|sv\/)?events\/([0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12})/)
 
     if(!regexedString || regexedString.length==1) {
         container.innerHTML = "<h2>Please navigate to the event page an reload this script!</h2>"
         return
     }
 
-    const id = regexedString[1]
+    const id = regexedString[2]
     document.getElementById("reserveButton").addEventListener("click", async (e) => {
         //Get value of amount field
         const amountField = document.getElementById("amount").value
@@ -104,35 +115,29 @@ chrome.tabs.query({currentWindow: true, active: true}, async (tabs) => {
 
         let variants, product
 
+        //Make sure that the sales have actually started
+        while(true) {
+            const inventoryData = (await (await fetch(url, options)).json())
+            variants = inventoryData['model']['variants']
+            product = inventoryData['model']['product']
+            let salesOngoing = product['salesOngoing']
+            let salesPaused = product['salesPaused']
+            let salesStarted = product['salesStarted']
+            if(salesStarted && salesOngoing && !salesPaused) {
+                break
+            }
+        }
+
+        //Get maximum amount that can be reserved
+        let maxTotalReservationsPerCheckout = product['maxTotalReservationsPerCheckout']
+
         let reservationPost
+        let reservationJson
+        let successful = false
 
         let firstIteration = true
 
-        while(!reservationPost || !reservationPost.body) {
-
-            //Make sure that the sales have actually started
-            let firstFetch = true
-            while(true) {
-                const inventoryData = (await (await fetch(url, options)).json())
-                variants = inventoryData['model']['variants']
-                product = inventoryData['model']['product']
-                let salesOngoing = product['salesOngoing']
-                let salesPaused = product['salesPaused']
-                let salesStarted = product['salesStarted']
-                let totalAvailability = variants.reduce((acc, v) => acc + v['availability'], 0)
-                if(totalAvailability===0) {
-                    firstFetch && addMessage("No tickets available, fetching again", 0)
-                    await sleep(50)
-                    firstFetch = false
-                    continue
-                }
-                if(salesStarted && salesOngoing && !salesPaused) {
-                    break
-                }
-            }
-
-            //Get maximum amount that can be reserved
-            let maxTotalReservationsPerCheckout = product['maxTotalReservationsPerCheckout']
+        while(!successful) {
 
             let toCreates = []
             let variant = 0
@@ -187,48 +192,51 @@ chrome.tabs.query({currentWindow: true, active: true}, async (tabs) => {
                 }
 
                 let v = variants[variant]
-                let availability = v['availability']
-                toCreates.push({"inventoryId": v['inventoryId'], "quantity": Math.min(amount, availability, maxTotalReservationsPerCheckout)})
+                toCreates.push({"inventoryId": v['inventoryId'], "quantity": Math.min(amount, maxTotalReservationsPerCheckout)})
                 firstIteration && addMessage("Reservations limited. Trying to reserve ticket " + v['name']+".", 2)
             }
 
             //Reservation
             reservationPost = await makeReservation(toCreates, auth)
             addMessage("Status: "+reservationPost.status, 1)
-            if(reservationPost.status==200) {
+            const result = await isSuccessful(reservationPost)
+            successful = result['successful']
+            reservationJson = result['reservationJson']
+
+            if(successful) {
                 chrome.tabs.reload()
             }
 
             let variantIndex = 0
             //If the reservation fails try every variant one at a time
-            while(maxTotalReservationsPerCheckout && reservationPost.status!=200) {
+            while(maxTotalReservationsPerCheckout && !successful) {
                 toCreates=[]
                 addMessage("Error, trying again", 1)
-                if(variantIndex == variant) {
-                    variantIndex = variantIndex+1
-                }
                 let v=variants[variantIndex]
-                console.log(variantIndex)
-                let availability = v['availability']
                 addMessage("Trying to reserve ticket " + v['name']+".", 2)
-                toCreates.push({"inventoryId": v['inventoryId'], "quantity":Math.min(amount, availability, maxTotalReservationsPerCheckout)})
+                toCreates.push({"inventoryId": v['inventoryId'], "quantity":Math.min(amount, maxTotalReservationsPerCheckout)})
 
                 //Reservation
                 reservationPost = await makeReservation(toCreates, auth)
                 addMessage("Status: "+reservationPost.status, 1)
+                const result = await isSuccessful(reservationPost)
+                successful = result['successful']
+                reservationJson = result['reservationJson']
 
-                if(reservationPost.status==200) {
+                if(successful) {
                     chrome.tabs.reload()
                 }
 
                 variantIndex = variantIndex+1
+                if(variantIndex>=variants.length) {
+                    break
+                }
             }
 
-            //If the availibity info is wrong, we need to try again without the variant that failed
-            while(!maxTotalReservationsPerCheckout && reservationPost.status!=200) {
+            //If the availability info is wrong, we need to try again without the variant that failed
+            while(!maxTotalReservationsPerCheckout && !successful) {
                 addMessage("Error, trying again", 1)
-                let jsonData = await reservationPost.json()
-                let errorInventoryId = jsonData['error']['entity']['inventoryId']
+                let errorInventoryId = reservationJson?.['error']?.['entity']?.['inventoryId']
 
                 let newVariants = []
 
@@ -243,16 +251,18 @@ chrome.tabs.query({currentWindow: true, active: true}, async (tabs) => {
                 //Reservation
                 reservationPost = await makeReservation(toCreates, auth)
                 addMessage("Status: "+reservationPost.status, 1)
+                const result = await isSuccessful(reservationPost)
+                successful = result['successful']
+                reservationJson = result['reservationJson']
 
-                if(reservationPost.status==200) {
+                if(successful) {
                     chrome.tabs.reload()
                 }
             }
-            const reservationJson = await reservationPost.json()
             //addMessage("Response JSON", 1)
             //addMessage(`${JSON.stringify(reservationJson)}`, 2)
 
-            if(reservationPost.status==200) {
+            if(reservationJson && successful) {
                 addMessage("Reservation successful!", 0)
                 const reservations = reservationJson['model']['reservations']
                 const reservationsText = reservations.map((r) => `${r['reservedQuantity']} of ticket ${r['variantName']}`).join(', ')
