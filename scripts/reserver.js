@@ -161,7 +161,7 @@ chrome.tabs.query({currentWindow: true, active: true}, async (tabs) => {
                     let i = 0
                     while(i<variants.length) {
                         let pricePerItem = variants[i]['pricePerItem']
-                        if(pricePerItem==wantedPrice) {
+                        if(pricePerItem==price) {
                             variant = i
                             break
                         }
