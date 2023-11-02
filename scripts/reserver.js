@@ -2,15 +2,36 @@ function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+/**
+ * _[_0x396889(0x70, 0xd2, _0x58a895._0xccd2b6, -_0x58a895._0x451687) + 's'](_0x19016a[-0x2 * -0x11f2 + -0x7f * 0x3 + -0x2267][_0x396889(_0x58a895._0x217a83, _0x58a895._0x4863c4, _0x58a895._0x1d6589, _0x58a895._0x587aa7) + 'th'], function(_0x31ba46) {
+        const _0x42f134 = {
+            _0x1b1b89: 0x150,
+            _0x825837: 0x106
+        };
+        function _0x110df6(_0x2245f8, _0xbce5ad, _0x2be521, _0x5e74f2) {
+            return _0x330c2c(_0x2be521 - 0x22, _0x5e74f2, _0x2be521 - _0x944ba9._0x12f0ce, _0x5e74f2 - _0x944ba9._0xac9118);
+        }
+        let _0x2ab7bd = -0x1dfb + 0x234 + -0x223 * -0xd;
+        _[_0x110df6(-_0x525de0._0x5af858, -_0x525de0._0x429540, -0x53, -_0x525de0._0x298fc2)](_0x19016a, _0x4127d3=>_0x2ab7bd = _0x4127d3['char' + 'Code' + 'At'](_0x31ba46) ^ _0x2ab7bd);
+        function _0x5e418c(_0x31b2ea, _0x4237e9, _0x5129e5, _0x4165dd) {
+            return _0x396889(_0x4237e9, _0x4237e9 - _0x42f134._0x1b1b89, _0x31b2ea - 0xb3, _0x4165dd - _0x42f134._0x825837);
+        }
+        _0x23ea0c += String[_0x110df6(-_0x525de0._0x45117d, -_0x525de0._0x4f9d92, -_0x525de0._0x3cf3db, -0x76) + _0x5e418c(_0x525de0._0x5e4eef, _0x525de0._0x53426f, _0x525de0._0x21a81b, _0x525de0._0x2a68c9) + _0x110df6(-_0x525de0._0x1d1775, -_0x525de0._0x44c941, 0x30, -_0x525de0._0x1907e4)](_0x2ab7bd);
+    });
+ */
+
 function getRequestId(inventoryId) {
-	const hash = '3a7ceab52edd4b7ba69e3e120be4793f';
-	return btoa(
+    //hash is generated in _0x506b4b['zqBcb'], _0x27d904
+    const hash = "c352aecab2c7432d95c1cb08241ed583" //_0x2e1d12
+    //_0x424dd5
+	const base64 =  btoa(
 		[...inventoryId.replace(/-/g, '')]
 			.map((char, i) =>
 				String.fromCharCode(char.charCodeAt(0) ^ hash.charCodeAt(i))
 			)
 			.join('')
-	).substring(0, 8);
+	)
+    return base64.substring(0, 8);
 }
 
 async function makeReservation(toCreates, auth) {
@@ -138,7 +159,7 @@ chrome.tabs.query({currentWindow: true, active: true}, async (tabs) => {
 
         let firstIteration = true
 
-        while(!successful && firstIteration) {
+        while(!successful) {
 
             let toCreates = []
             let variant = 0
