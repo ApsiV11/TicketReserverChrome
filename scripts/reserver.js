@@ -58,7 +58,9 @@ function addMessage(text, type) {
 chrome.tabs.query({currentWindow: true, active: true}, async (tabs) => {
     const result = await chrome.scripting.executeScript({target: {tabId: tabs[0].id}, func: () => {return localStorage['authorization.token']} })
     
-    const auth = result[0].result.substring(1, result[0].result.length-1)
+    const authWithWarning = result[0].result.substring(1, result[0].result.length-1)
+    const splitted = authWithWarning.split(" ")
+    const auth = splitted[splitted.length-1].split("").reverse().join("")
     const regexedString = tabs[0].url.match(/https:\/\/kide\.app\/(en\/|fi\/|sv\/)?events\/([0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12})/)
 
     if(!regexedString || regexedString.length==1) {
