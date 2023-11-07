@@ -25,7 +25,7 @@ async function makeReservation(toCreates, auth) {
                 'origin': 'https://kide.app',
                 'referer': 'https://kide.app/',
                 'Content-Type': 'application/json;charset=UTF-8',
-                'X-Requested-Token': getRequestId(toCreate['inventoryId'], secretHash)
+                'X-Requested-Token-28': getRequestId(toCreate['inventoryId'], secretHash)
             },
             body: JSON.stringify(body)
         }
