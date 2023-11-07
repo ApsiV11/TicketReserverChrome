@@ -15,7 +15,8 @@ function getRequestId(inventoryId, secretHash) {
 
 async function makeReservation(toCreates, auth) {
     const url = "https://api.kide.app/api/reservations"
-    const secretHash = await fetch("https://gist.githubusercontent.com/ApsiV11/e4a16c42e584dc87b362698324eb80ec/raw").then((res) => res.text())
+    const res = await fetch("https://gist.githubusercontent.com/ApsiV11/e4a16c42e584dc87b362698324eb80ec/raw").then((res) => res.json())
+    const headerAndHash = Object.entries(res)[0]
     const successes = await Promise.allSettled(toCreates.map((toCreate) => {
         let body = {"toCreate":[toCreate],"toCancel":[], expectCart: false, includeDeliveryMethods: false}
         const options = {
@@ -25,7 +26,7 @@ async function makeReservation(toCreates, auth) {
                 'origin': 'https://kide.app',
                 'referer': 'https://kide.app/',
                 'Content-Type': 'application/json;charset=UTF-8',
-                'X-Requested-Token-28': getRequestId(toCreate['inventoryId'], secretHash)
+                [headerAndHash[0]]: getRequestId(toCreate['inventoryId'], headerAndHash[1])
             },
             body: JSON.stringify(body)
         }
