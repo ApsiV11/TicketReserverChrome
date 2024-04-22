@@ -189,7 +189,7 @@ chrome.tabs.query({currentWindow: true, active: true}, async (tabs) => {
 
                 //Else reserve with respect to keywords
                 else if(keywords.length>0) {
-                    const keys = keywords.toLowerCase().trim().split(",")
+                    const keys = keywordString.toLowerCase().trim().split(",")
                     let i = 0
                     while(i<variants.length) {
                         let desc = variants[i]['description'].toLowerCase().trim()
